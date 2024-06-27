@@ -2,7 +2,7 @@ package route
 
 import (
     "github.com/labstack/echo/v4"
-    "github.com/username/project-t/handlers"
+    "project-t/handler"
 )
 
     func Init() *echo.Echo {
@@ -11,6 +11,8 @@ import (
         // Routes
         e.GET("/", handler.Home)
         e.GET("/tasks", handler.GetTasks)
+        e.POST("/tasks", handler.CreateTask)
+        e.DELETE("/tasks/:id", handler.DeleteTask)
 
         return e
     }
