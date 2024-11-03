@@ -5,6 +5,6 @@ type Task struct {
     Name        string `json:"name"`
     Description string `json:"description"`
     Complexity  string `json:"complexity"`
-    Status      string `json:"status"`
+    Category      string `json:"category"`
 }
 
