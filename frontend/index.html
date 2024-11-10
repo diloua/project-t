@@ -1,0 +1,71 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Simple Task Board</title>
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+    <header>
+        <h1>Simple Task Board</h1>
+        <button id="createTaskBtn">Create Task</button>
+    </header>
+
+    <main>
+        <div class="board">
+            <div class="column" data-category="To Do">
+                <h2>To Do</h2>
+                <div class="tasks" id="todoTasks"></div>
+            </div>
+            <div class="column" data-category="In Progress">
+                <h2>In Progress</h2>
+                <div class="tasks" id="inProgressTasks"></div>
+            </div>
+            <div class="column" data-category="Review">
+                <h2>Review</h2>
+                <div class="tasks" id="reviewTasks"></div>
+            </div>
+            <div class="column" data-category="Done">
+                <h2>Done</h2>
+                <div class="tasks" id="doneTasks"></div>
+            </div>
+        </div>
+    </main>
+
+    <!-- Modal for Creating a Task -->
+    <div id="taskModal" class="modal">
+        <div class="modal-content">
+            <span class="close">&times;</span>
+            <h2>Create New Task</h2>
+            <form id="taskForm">
+                <label for="name">Name:</label>
+                <input type="text" id="name" name="name" required>
+
+                <label for="description">Description:</label>
+                <textarea id="description" name="description" required></textarea>
+
+                <label for="complexity">Complexity:</label>
+                <select id="complexity" name="complexity" required>
+                    <option value="">Select Complexity</option>
+                    <option value="Low">Low</option>
+                    <option value="Medium">Medium</option>
+                    <option value="High">High</option>
+                </select>
+
+                <label for="category">Category:</label>
+                <select id="category" name="category" required>
+                    <option value="">Select Category</option>
+                    <option value="To Do">To Do</option>
+                    <option value="In Progress">In Progress</option>
+                    <option value="Review">Review</option>
+                    <option value="Done">Done</option>
+                </select>
+
+                <button type="submit">Create Task</button>
+            </form>
+        </div>
+    </div>
+
+    <script src="script.js"></script>
+</body>
+</html>
