@@ -68,5 +68,20 @@ func UpdateTask (c echo.Context) error {
 }
 
 func DeleteTask(c echo.Context) error {
-    return c.String(http.StatusOK, "Delete a task")
+    idParam := c.Param("id")
+    id, err := strconv.Atoi(idParam)
+    if err != nil {
+        return c.JSON(http.StatusBadRequest, map[string]string{
+            "error": "Invalid task ID",
+        })
+    }
+    err = taskService.DeleteTask(id)
+    if err != nil {
+        return c.JSON(http.StatusBadRequest, map[string]string{
+            "error": err.Error(),
+        })
+    }
+    return c.JSON(http.StatusOK, map[string]string{
+        "message": "Task deleted successfully",
+    })
 }
