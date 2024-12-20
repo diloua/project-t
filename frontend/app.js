@@ -43,12 +43,16 @@ function createTaskElement(task) {
         <h5>${task.name}</h5>
         <p>${task.description || ''}</p>
         <small>Complexity: ${task.complexity}</small>
+        <button class="btn btn-danger btn-sm delete-task" title="Delete Task">Delete</button>
+
     `;
+    taskDiv.querySelector('.delete-task').addEventListener('click', function(e) {
+        e.stopPropagation(); // Prevent triggering other events
+        deleteTask(task.id, taskDiv);
+    });
     // Set data attribute for task ID
     taskDiv.setAttribute('data-task-id', task.id);
     taskDiv.addEventListener('dragstart', drag);
-
-
     return taskDiv;
 }
 
@@ -151,4 +155,28 @@ function updateTaskCategory(taskId, newCategory) {
                     console.error('Error updating task:', error);
                     alert('Error updating task: ' + error.error);
                 });
+}
+
+function deleteTask(taskId, taskElement) {
+    if (!confirm('Are you sure you want to delete this task?')) {
+        return;
+    }
+
+    fetch(`http://localhost:8080/tasks/${taskId}`, {
+        method: 'DELETE',
+    })
+    .then(response => {
+        if (!response.ok) {
+            return response.json().then(err => { throw err; });
+        }
+        return response.json();
+    })
+    .then(() => {
+        // Remove the task element from the UI
+        taskElement.remove();
+    })
+    .catch(error => {
+        console.error('Error deleting task:', error);
+        alert('Error deleting task: ' + (error.error || 'Unknown error'));
+    });
 }
