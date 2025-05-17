@@ -10,7 +10,8 @@ function fetchTasks() {
         .then(data => {
             displayTasks(data);
         })
-        .catch(error => {
+        console.log("Tasks received:", data); // Log the data
+        catch(error => {
             console.error('Error fetching tasks:', error);
         });
 }
