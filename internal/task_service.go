@@ -1,24 +1,24 @@
 package internal
 
-import "errors"
-import "database/sql"
-import "fmt"
-import "log"
+import (
+    "database/sql"
+    "errors"
+    "fmt"
+    "log"
+)
 
-var tasks = []Task{}
-
-var nextID = 1
 var allowedCategories = map[string]bool{
-    "To Do": true,
+    "To Do":       true,
     "In Progress": true,
-    "Done": true,
+    "Done":        true,
 }
 
-type TaskService struct{
+type TaskService struct {
     DB *sql.DB
 }
 
 func (ts *TaskService) CreateTask(task Task) (Task, error) {
+    // Validate task
     if task.Name == "" {
         return Task{}, errors.New("Name is required")
     }
@@ -33,22 +33,20 @@ func (ts *TaskService) CreateTask(task Task) (Task, error) {
         }
     }
     
-    // Use standard SQL insert without RETURNING clause
+    // Use PostgreSQL's RETURNING clause to get the ID
+    var id int
     query := `
     INSERT INTO tasks (name, description, complexity, category)
-    VALUES (?, ?, ?, ?)
+    VALUES ($1, $2, $3, $4)
+    RETURNING id
     `
-    result, err := ts.DB.Exec(query, task.Name, task.Description, task.Complexity, task.Category)
+    err := ts.DB.QueryRow(query, task.Name, task.Description, task.Complexity, task.Category).Scan(&id)
     if err != nil {
         return Task{}, err
     }
     
-    id, err := result.LastInsertId()
-    if err != nil {
-        return Task{}, err
-    }
-    log.Printf("Task inserted with ID: %d", id)   
-    task.Id = int(id)
+    log.Printf("Task inserted with ID: %d", id)
+    task.Id = id
     
     return task, nil
 }
@@ -58,7 +56,6 @@ func (ts *TaskService) GetTasks() []Task {
     
     rows, err := ts.DB.Query("SELECT id, name, description, complexity, category FROM tasks")
     if err != nil {
-        // Log the error but return an empty slice rather than failing
         fmt.Println("Error fetching tasks:", err)
         return tasks
     }
@@ -68,7 +65,6 @@ func (ts *TaskService) GetTasks() []Task {
         var task Task
         err := rows.Scan(&task.Id, &task.Name, &task.Description, &task.Complexity, &task.Category)
         if err != nil {
-            // Log the error but continue with other rows
             fmt.Println("Error scanning task row:", err)
             continue
         }
@@ -83,60 +79,67 @@ func (ts *TaskService) GetTasksByCategory(category string) ([]Task, error) {
     if !allowedCategories[category] {
         return nil, errors.New("Category is invalid")
     }
-	rows, err := ts.DB.Query("SELECT id, name, description, complexity, category FROM tasks WHERE category = ?", category)
-	if err != nil {
-		return nil, err
-	}
-	for rows.Next() {
-		var task Task
-		err := rows.Scan(&task.Id, &task.Name, &task.Description, &task.Complexity, &task.Category)
-		if err != nil {
-			return nil, err
-		}
-		tasks = append(tasks, task)
-	}
-	log.Printf("Retrieved %d tasks from category %s", len(tasks), category)
-	return tasks, nil
+
+    var tasks []Task
+    rows, err := ts.DB.Query("SELECT id, name, description, complexity, category FROM tasks WHERE category = $1", category)
+    if err != nil {
+        return nil, err
+    }
+    defer rows.Close()
+    
+    for rows.Next() {
+        var task Task
+        err := rows.Scan(&task.Id, &task.Name, &task.Description, &task.Complexity, &task.Category)
+        if err != nil {
+            return nil, err
+        }
+        tasks = append(tasks, task)
+    }
+    log.Printf("Retrieved %d tasks from category %s", len(tasks), category)
+    return tasks, nil
 }
 
 func (ts *TaskService) UpdateTask(id int, updatedTask Task) (Task, error) {
-	var existingTask Task
-	err := ts.DB.QueryRow("SELECT id, name, description, complexity, category FROM tasks WHERE id = ?", id).Scan(&existingTask.Id, &existingTask.Name, &existingTask.Description, &existingTask.Complexity, &existingTask.Category)
-	if err != nil {
-		if err == sql.ErrNoRows {
-			return Task{}, errors.New("Task not found")
-		}
-		return Task{}, err
-	}
-	if updatedTask.Name != "" {
-		existingTask.Name = updatedTask.Name
-	}
-	if updatedTask.Complexity != "" {
-		existingTask.Complexity = updatedTask.Complexity
-	}
-	if updatedTask.Description != "" {
-		existingTask.Description = updatedTask.Description
-	}
-	if updatedTask.Category != "" {
-		if !allowedCategories[updatedTask.Category] {
-			return Task{}, errors.New("Category is invalid")
-		}
-		existingTask.Category = updatedTask.Category
-	}
+    var existingTask Task
+    err := ts.DB.QueryRow("SELECT id, name, description, complexity, category FROM tasks WHERE id = $1", id).Scan(
+        &existingTask.Id, &existingTask.Name, &existingTask.Description, &existingTask.Complexity, &existingTask.Category)
+    if err != nil {
+        if err == sql.ErrNoRows {
+            return Task{}, errors.New("Task not found")
+        }
+        return Task{}, err
+    }
+    
+    if updatedTask.Name != "" {
+        existingTask.Name = updatedTask.Name
+    }
+    if updatedTask.Complexity != "" {
+        existingTask.Complexity = updatedTask.Complexity
+    }
+    if updatedTask.Description != "" {
+        existingTask.Description = updatedTask.Description
+    }
+    if updatedTask.Category != "" {
+        if !allowedCategories[updatedTask.Category] {
+            return Task{}, errors.New("Category is invalid")
+        }
+        existingTask.Category = updatedTask.Category
+    }
 
-	_, err = ts.DB.Exec("UPDATE tasks SET name = ?, description = ?, complexity = ?, category = ? WHERE id = ?", existingTask.Name, existingTask.Description, existingTask.Complexity, existingTask.Category, id)
+    _, err = ts.DB.Exec(
+        "UPDATE tasks SET name = $1, description = $2, complexity = $3, category = $4 WHERE id = $5",
+        existingTask.Name, existingTask.Description, existingTask.Complexity, existingTask.Category, id)
 
-	if err != nil {
-		return Task{}, err
-	}
-	log.Printf("Task with ID %d updated successfully", id)
-	return existingTask, nil
+    if err != nil {
+        return Task{}, err
+    }
+    log.Printf("Task with ID %d updated successfully", id)
+    return existingTask, nil
 }
-
 
 func (ts *TaskService) DeleteTask(id int) error {
     // Execute DELETE query against the database
-    result, err := ts.DB.Exec("DELETE FROM tasks WHERE id = ?", id)
+    result, err := ts.DB.Exec("DELETE FROM tasks WHERE id = $1", id)
     if err != nil {
         log.Printf("Error deleting task: %v", err)
         return err
@@ -157,4 +160,3 @@ func (ts *TaskService) DeleteTask(id int) error {
     log.Printf("Task with ID %d deleted successfully", id)
     return nil
 }
-
