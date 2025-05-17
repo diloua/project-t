@@ -8,10 +8,10 @@ function fetchTasks() {
     fetch('http://localhost:8080/tasks')
         .then(response => response.json())
         .then(data => {
+            console.log("Tasks received:", data); // Log the data
             displayTasks(data);
         })
-        console.log("Tasks received:", data); // Log the data
-        catch(error => {
+        .catch(error => {
             console.error('Error fetching tasks:', error);
         });
 }
