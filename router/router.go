@@ -1,19 +1,20 @@
-package route
+package router
 
 import (
     "github.com/labstack/echo/v4"
     "project-t/handler"
+    "project-t/internal"
 )
 
-    func Init() *echo.Echo {
+    func Init(taskService *internal.TaskService) *echo.Echo {
         e := echo.New()
-
+        h := handler.NewHandler(taskService)
         // Routes
         e.GET("/", handler.Home)
-        e.GET("/tasks", handler.GetTasks)
-        e.POST("/tasks", handler.CreateTask)
-        e.PUT("/tasks/:id", handler.UpdateTask)
-        e.DELETE("/tasks/:id", handler.DeleteTask)
+        e.GET("/tasks", h.GetTasks)
+        e.POST("/tasks", h.CreateTask)
+        e.PUT("/tasks/:id", h.UpdateTask)
+        e.DELETE("/tasks/:id", h.DeleteTask)
 
         return e
     }
