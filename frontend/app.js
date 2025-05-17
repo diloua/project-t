@@ -1,4 +1,4 @@
-// app.js - Fixed Version
+// app.js
 
 document.addEventListener('DOMContentLoaded', () => {
     // Set up form toggle
