@@ -8,6 +8,7 @@ function fetchTasks() {
     fetch('http://localhost:8080/tasks')
         .then(response => response.json())
         .then(data => {
+            console.log("Tasks received TEST:", data); // Log the data
             displayTasks(data);
         })
         .catch(error => {
@@ -25,11 +26,11 @@ function displayTasks(tasks) {
         const taskElement = createTaskElement(task);
 
         // Append task to the appropriate column based on its category
-        if (task.Category === 'To Do') {
+        if (task.category === 'To Do') {
             document.getElementById('todo-column').appendChild(taskElement);
-        } else if (task.Category === 'In Progress') {
+        } else if (task.category === 'In Progress') {
             document.getElementById('inprogress-column').appendChild(taskElement);
-        } else if (task.Category === 'Done') {
+        } else if (task.category === 'Done') {
             document.getElementById('done-column').appendChild(taskElement);
         }
     });
