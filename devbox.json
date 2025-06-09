@@ -1,0 +1,8 @@
+{
+  "packages": [
+    "google-cloud-sdk"
+  ],
+  "env": {
+    "CLOUDSDK_CORE_PROJECT": "pluma-development"
+  }
+}
