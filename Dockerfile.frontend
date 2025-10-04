@@ -1,0 +1,24 @@
+# Simple static file server - build from frontend directory only
+FROM golang:1.23-alpine AS builder
+
+WORKDIR /app
+# Copy only the frontend server.go (no other Go files)
+COPY frontend/server.go ./server.go
+RUN CGO_ENABLED=0 GOOS=linux go build -a -installsuffix cgo -o server server.go
+
+# Final image
+FROM alpine:latest
+RUN apk --no-cache add ca-certificates
+
+WORKDIR /app
+
+# Copy static files - explicitly from frontend/
+COPY frontend/index.html ./index.html
+COPY frontend/app.js ./app.js
+
+# Copy server binary
+COPY --from=builder /app/server ./server
+
+EXPOSE 3000
+
+CMD ["./server"]

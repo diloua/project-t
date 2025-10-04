@@ -44,8 +44,8 @@ resource "google_container_node_pool" "primary_nodes" {
   node_config {
     # Use spot instances for cost savings
     spot         = true
-    machine_type = "e2-micro"  # Cheapest option: 1 vCPU, 1GB RAM
-    disk_size_gb = 10          # Minimum disk size
+    machine_type = "e2-small"  # Minimum practical: 2 vCPU, 2GB RAM
+    disk_size_gb = 20          # Increased to avoid disk pressure
     disk_type    = "pd-standard"
 
     service_account = google_service_account.gke_node_sa.email
