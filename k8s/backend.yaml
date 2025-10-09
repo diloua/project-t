@@ -45,6 +45,7 @@ metadata:
   name: backend
   namespace: pluma-kanban
 spec:
+  type: ClusterIP  # Internal only, Ingress will handle external access
   selector:
     app: backend
   ports:

@@ -11,10 +11,10 @@ import (
         h := handler.NewHandler(taskService)
         // Routes
         e.GET("/", handler.Home)
-        e.GET("/tasks", h.GetTasks)
-        e.POST("/tasks", h.CreateTask)
-        e.PUT("/tasks/:id", h.UpdateTask)
-        e.DELETE("/tasks/:id", h.DeleteTask)
+        e.GET("/api/tasks", h.GetTasks)
+        e.POST("/api/tasks", h.CreateTask)
+        e.PUT("/api/tasks/:id", h.UpdateTask)
+        e.DELETE("/api/tasks/:id", h.DeleteTask)
 
         return e
     }

@@ -40,7 +40,7 @@ metadata:
   name: frontend
   namespace: pluma-kanban
 spec:
-  type: LoadBalancer
+  type: ClusterIP  # Internal only, Ingress will handle external access
   selector:
     app: frontend
   ports:

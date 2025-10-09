@@ -25,7 +25,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
 function fetchTasks() {
     // Use the full URL with the correct port
-    fetch('http://localhost:8080/tasks')
+    fetch('/api/tasks')
         .then(response => {
             if (!response.ok) {
                 throw new Error(`Server returned ${response.status}: ${response.statusText}`);
@@ -157,7 +157,7 @@ document.getElementById('task-form').addEventListener('submit', function(e) {
     submitButton.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Creating...';
     
     // Send POST request to backend with full URL
-    fetch('http://localhost:8080/tasks', {
+    fetch('/api/tasks', {
         method: 'POST',
         headers: {
             'Content-Type': 'application/json',
@@ -217,7 +217,7 @@ function updateTaskCategory(taskId, newCategory) {
         Category: newCategory  // Note: Using capital 'C' to match backend
     };
     
-    fetch(`http://localhost:8080/tasks/${taskId}`, {
+    fetch(`/api/tasks/${taskId}`, {
         method: 'PUT',
         headers: {
             'Content-Type': 'application/json',
@@ -253,7 +253,7 @@ function deleteTask(taskId, taskElement) {
         return;
     }
     
-    fetch(`http://localhost:8080/tasks/${taskId}`, {
+    fetch(`/api/tasks/${taskId}`, {
         method: 'DELETE',
     })
     .then(response => {
