@@ -29,12 +29,29 @@ func initDB() *sql.DB {
     
     log.Printf("Connecting to PostgreSQL at %s:%s", dbHost, dbPort)
     
-    // Connect to database
+    // First, connect without specifying a database to create it if needed
+    connStrNoDB := fmt.Sprintf("host=%s port=%s user=%s password=%s sslmode=disable",
+        dbHost, dbPort, dbUser, dbPassword)
+
+    dbSetup, err := sql.Open("postgres", connStrNoDB)
+    if err != nil {
+        log.Fatalf("Error connecting to PostgreSQL: %v", err)
+    }
+
+    // Create database if it doesn't exist
+    _, err = dbSetup.Exec(fmt.Sprintf("CREATE DATABASE %s", dbName))
+    if err != nil {
+        // Database might already exist, that's ok
+        log.Printf("Note: %v (database might already exist)", err)
+    }
+    dbSetup.Close()
+
+    // Now connect to the specific database
     database, err := sql.Open("postgres", connStr)
     if err != nil {
         log.Fatalf("Error opening database: %v", err)
     }
-    
+
     // Check connection
     err = database.Ping()
     if err != nil {
